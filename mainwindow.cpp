@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    parser_icon = false;
     QString showdemo;
     showdemo += "RVA        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F  Value   \n";
     showdemo += "00000000  CC CC CC CC CC CC CC CC  CC CC CC CC CC CC CC CC  ........\n";
@@ -65,26 +66,65 @@ void MainWindow::on_actionopen_triggered()
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
-    QString s("this is test!");
-    if(item->text(column) == elfdata.elffilename.c_str())
+    QString s("This sentence should not be displayed\n");
+    if(parser_icon)
     {
-        s = QString::fromStdString(elfdata.get_hex("all"));
-    }
-    else if(item->text(column) == "ELF文件头")
-    {
-        s = QString::fromStdString(elfdata.get_hex("EFL header"));
-    }
-    else if(item->text(column) == "程序段表")
-    {
-        s = QString::fromStdString(elfdata.get_hex("program header"));
-    }
-    else if(item->text(column) == "节表")
-    {
-        s = QString::fromStdString(elfdata.get_hex("section header"));
+        if(item->text(column) == elfdata.elffilename.c_str())
+        {
+            s = QString::fromStdString(elfdata.get_hex("all"));
+        }
+        else if(item->text(column) == "ELF文件头")
+        {
+            s = QString::fromStdString(elfdata.get_content("EFL header"));
+        }
+        else if(item->text(column) == "程序段表")
+        {
+            s = QString::fromStdString(elfdata.get_content("program header"));
+        }
+        else if(item->text(column) == "节表")
+        {
+            s = QString::fromStdString(elfdata.get_content("section header"));
+        }
+        else
+        {
+            s = QString::fromStdString(elfdata.get_content(item->text(column).toStdString().c_str()));
+        }
     }
     else
     {
-        s = QString::fromStdString(elfdata.get_hex(item->text(column).toStdString().c_str()));
+        if(item->text(column) == elfdata.elffilename.c_str())
+        {
+            s = QString::fromStdString(elfdata.get_hex("all"));
+        }
+        else if(item->text(column) == "ELF文件头")
+        {
+            s = QString::fromStdString(elfdata.get_hex("EFL header"));
+        }
+        else if(item->text(column) == "程序段表")
+        {
+            s = QString::fromStdString(elfdata.get_hex("program header"));
+        }
+        else if(item->text(column) == "节表")
+        {
+            s = QString::fromStdString(elfdata.get_hex("section header"));
+        }
+        else
+        {
+            s = QString::fromStdString(elfdata.get_hex(item->text(column).toStdString().c_str()));
+        }
     }
     ui->plainTextEdit->setPlainText(s);
+}
+
+void MainWindow::on_action_triggered(bool checked)
+{
+    parser_icon = checked;
+    if(true == parser_icon)
+    {
+        ui->plainTextEdit->setPlainText("当前为解析模式");
+    }
+    else
+    {
+        ui->plainTextEdit->setPlainText("当前为二进制模式");
+    }
 }

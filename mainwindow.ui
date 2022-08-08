@@ -122,6 +122,7 @@
    </attribute>
    <addaction name="actionopen"/>
    <addaction name="separator"/>
+   <addaction name="action"/>
   </widget>
   <action name="actionopen">
    <property name="icon">
@@ -133,6 +134,18 @@
    </property>
    <property name="toolTip">
     <string>打开文件</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icon/iconbit.qrc">
+     <normaloff>:/t.jpeg</normaloff>:/t.jpeg</iconset>
+   </property>
+   <property name="text">
+    <string>解析</string>
    </property>
   </action>
  </widget>
