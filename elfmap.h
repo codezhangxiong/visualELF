@@ -6,10 +6,17 @@
 using namespace std;
 
 typedef struct {
-    string Magic_number;
-    string File_class;
-    string Data_encoding;
-    string File_version;
+    string pFile;
+    string Data;
+    string Value;
+    string Description;
+} OneLine;
+
+typedef struct {
+    OneLine Magic_number;
+    OneLine File_class;
+    OneLine Data_encoding;
+    OneLine File_version;
 } Elf64_Ehdr_str;
 
 class elfmap
@@ -30,12 +37,7 @@ public:
     char* shname;
     vector<Elf64_Shdr *> vshdr;
     vector<Elf64_Phdr *> vphdr;
-    Elf64_Ehdr_str ehdrstr{
-        "Magic_number   ",
-        "File_class     ",
-        "Data_encoding  ",
-        "File_version   "
-    };
+    Elf64_Ehdr_str ehdrstr;
 };
 
 #endif // ELFMAP_H

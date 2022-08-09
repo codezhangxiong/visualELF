@@ -17,38 +17,64 @@ elfmap::~elfmap()
 
 bool elfmap::parser_ELFhead()
 {
-    char buff[64] = {0};
-    sprintf(buff,"%02X-%c%c%c\n",
-            ehdr->e_ident[0],ehdr->e_ident[1],ehdr->e_ident[2],ehdr->e_ident[3]);
-    ehdrstr.Magic_number += buff;
+    Elf64_Ehdr_str tempstr;
+    char dataBuff[64] = {0};
+    char valueBuff[64] = {0};
+
+    //Magic_number
+    sprintf(dataBuff,"%02X%02X%02X%02X    ",datap[0],datap[1],datap[2],datap[3]);
+    sprintf(valueBuff,"%02X-%c%c%c            ",datap[0],datap[1],datap[2],datap[3]);
+    ehdrstr.Magic_number.pFile = "00000000    ";
+    ehdrstr.Magic_number.Data = dataBuff;
+    ehdrstr.Magic_number.Value = valueBuff;
+    ehdrstr.Magic_number.Description = "Magic_number\n";
+
+    //File_class
+    sprintf(dataBuff,"%02X          ",datap[4]);
     if(ehdr->e_ident[EI_CLASS] == ELFCLASSNONE)
     {
-        sprintf(buff,"Invalid class\n");
+        sprintf(valueBuff,"Invalid class     ");
     }
     else if(ehdr->e_ident[EI_CLASS] == ELFCLASS32)
     {
-        sprintf(buff,"32-bit objects\n");
+        sprintf(valueBuff,"32-bit objects    ");
     }
     else if(ehdr->e_ident[EI_CLASS] == ELFCLASS64)
     {
-        sprintf(buff,"64-bit objects\n");
+        sprintf(valueBuff,"64-bit objects    ");
     }
-    ehdrstr.File_class += buff;
+    ehdrstr.File_class.pFile = "00000004    ";
+    ehdrstr.File_class.Data = dataBuff;
+    ehdrstr.File_class.Value = valueBuff;
+    ehdrstr.File_class.Description = "File_class\n";
+
+    //Data_encoding
+    sprintf(dataBuff,"%02X          ",datap[5]);
     if(ehdr->e_ident[EI_DATA] == ELFDATANONE)
     {
-        sprintf(buff,"Invalid class\n");
+        sprintf(valueBuff,"Invalid data      ");
     }
     else if(ehdr->e_ident[EI_DATA] == ELFDATA2LSB)
     {
-        sprintf(buff,"little endian\n");
+        sprintf(valueBuff,"little endian     ");
     }
     else if(ehdr->e_ident[EI_DATA] == ELFDATA2MSB)
     {
-        sprintf(buff,"big endian\n");
+        sprintf(valueBuff,"big endian        ");
     }
-    ehdrstr.Data_encoding += buff;
-    sprintf(buff,"%d",ehdr->e_ident[EI_VERSION]);
-    ehdrstr.File_version += buff;
+    ehdrstr.Data_encoding.pFile = "00000005    ";
+    ehdrstr.Data_encoding.Data = dataBuff;
+    ehdrstr.Data_encoding.Value = valueBuff;
+    ehdrstr.Data_encoding.Description = "Data_encoding\n";
+
+    //File_version
+    sprintf(dataBuff,"%02X          ",datap[6]);
+    sprintf(valueBuff,"%-2d                ",datap[6]);
+    ehdrstr.File_version.pFile = "00000006    ";
+    ehdrstr.File_version.Data = dataBuff;
+    ehdrstr.File_version.Value = valueBuff;
+    ehdrstr.File_version.Description = "File_version\n";
+
     return true;
 }
 
@@ -94,12 +120,22 @@ string elfmap::get_content(const char* section)
 
     if(ss == "EFL header")
     {
-        retstr += showhead;
-        retstr += get_hex_base(0,EI_NIDENT);
-        retstr += ehdrstr.Magic_number;
-        retstr += ehdrstr.File_class;
-        retstr += ehdrstr.Data_encoding;
-        retstr += ehdrstr.File_version;
+        retstr += ehdrstr.Magic_number.pFile;
+        retstr += ehdrstr.Magic_number.Data;
+        retstr += ehdrstr.Magic_number.Value;
+        retstr += ehdrstr.Magic_number.Description;
+        retstr += ehdrstr.File_class.pFile;
+        retstr += ehdrstr.File_class.Data;
+        retstr += ehdrstr.File_class.Value;
+        retstr += ehdrstr.File_class.Description;
+        retstr += ehdrstr.Data_encoding.pFile;
+        retstr += ehdrstr.Data_encoding.Data;
+        retstr += ehdrstr.Data_encoding.Value;
+        retstr += ehdrstr.Data_encoding.Description;
+        retstr += ehdrstr.File_version.pFile;
+        retstr += ehdrstr.File_version.Data;
+        retstr += ehdrstr.File_version.Value;
+        retstr += ehdrstr.File_version.Description;
     }
     else if(ss == "section header")
     {
