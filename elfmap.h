@@ -33,10 +33,13 @@ public:
     string elffilename;
     char* datap;
     long datalen;
+    long symoff;
+    long symnameoff;
     Elf64_Ehdr *ehdr;
     char* shname;
     vector<Elf64_Shdr *> vshdr;
     vector<Elf64_Phdr *> vphdr;
+    vector<Elf64_Sym *> vsym;
     Elf64_Ehdr_str ehdrstr;
 };
 

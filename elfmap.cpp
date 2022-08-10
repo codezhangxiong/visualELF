@@ -17,7 +17,6 @@ elfmap::~elfmap()
 
 bool elfmap::parser_ELFhead()
 {
-    Elf64_Ehdr_str tempstr;
     char dataBuff[64] = {0};
     char valueBuff[64] = {0};
 
@@ -105,6 +104,26 @@ bool elfmap::parser(const char *filename)
         if(ehdr->e_shstrndx == i)
         {
             shname = (char*)(datap + shdr->sh_offset);
+        }
+    }
+    for(auto it : vshdr)
+    {
+        if(SHT_SYMTAB == it->sh_type)
+        {
+            symoff = it->sh_offset;
+            int n = (it->sh_size)/sizeof(Elf64_Sym);
+            for(int i = 0;i<n;i++)
+            {
+                Elf64_Sym *sym = (Elf64_Sym *)(it->sh_offset)+i;
+                vsym.push_back(sym);
+            }
+        }
+    }
+    for(auto it : vshdr)
+    {
+        if(string(".strtab") == shname+it->sh_name)
+        {
+            symnameoff = it->sh_offset;
         }
     }
 
@@ -212,6 +231,19 @@ string elfmap::get_hex(const char* section)
             sprintf(sectionname,"[%02d]\n", i);
             retstr += sectionname;
             retstr += get_hex_base(ehdr->e_phoff+i*sizeof(Elf64_Phdr),sizeof(Elf64_Phdr));
+            i++;
+        }
+    }
+    else if(ss.substr(4,ss.length()-4) == ".symtab")
+    {
+        int i = 0;
+        for(auto it : vsym)
+        {
+            char sectionname[64] = {0};
+            //sprintf(sectionname,"[%02d]%s\n", i,datap+symnameoff+it->st_name);
+            sprintf(sectionname,"[%02d]\n", i);
+            retstr += sectionname;
+            retstr += get_hex_base(symoff+i*sizeof(Elf64_Sym),sizeof(Elf64_Sym));
             i++;
         }
     }
