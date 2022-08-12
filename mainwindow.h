@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QFileDialog>
 #include <QtWidgets/QTreeWidgetItem>
-#include "elfmap.h"
+#include "ELFMap.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,8 +17,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    elfmap elfdata;
-    bool parser_icon;
+    ELFMap elfMap;
+    bool m_isParserIcon;
 
 private:
     Ui::MainWindow *ui;

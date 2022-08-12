@@ -26,12 +26,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    elfmap.cpp
+    ELFMap.cpp
 
 HEADERS += \
         mainwindow.h \
     myelf.h \
-    elfmap.h
+    ELFMap.h
 
 FORMS += \
         mainwindow.ui
