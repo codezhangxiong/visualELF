@@ -36,15 +36,29 @@ bool ELFMap::Parser(const char *fileNameAndPath)
 
     //解析
     m_ehdr = (Elf64_Ehdr*)m_dataBuff;
-    m_shNameSection = m_dataBuff + m_ehdr->e_shoff + sizeof(Elf64_Shdr) * m_ehdr->e_shnum;
+
+    char* shNameSectionHead = m_dataBuff + m_ehdr->e_shoff + sizeof(Elf64_Shdr) * m_ehdr->e_shstrndx;
+    m_shNameSection = m_dataBuff+((Elf64_Shdr*)shNameSectionHead)->sh_offset;
     for(int i=0; i< m_ehdr->e_shnum; i++)
     {
         Elf64_Shdr *shdr = (Elf64_Shdr*)(m_dataBuff + m_ehdr->e_shoff) + i;
         m_vshdr.push_back(shdr);
-        if(string(".strtab") == string(m_shNameSection + it->sh_name))
+        if(string(".strtab") == string(m_shNameSection + shdr->sh_name))
         {
-            m_symNameSection = it->sh_offset;
-        }/*
+            m_symNameSection = m_dataBuff+ shdr->sh_offset;
+        }
+        //
+        else if(string(".symtab") == string(m_shNameSection + shdr->sh_name))
+        {
+            char* sectionBegin = m_dataBuff+shdr->sh_offset;
+            int symCount = shdr ->sh_size/sizeof(Elf64_Sym);
+            for(int i =0;i<symCount;i++)
+            {
+                Elf64_Sym* sym = (Elf64_Sym*)sectionBegin+i;
+                m_vsym.push_back(sym);
+            }
+        }
+        /*
         if(SHT_SYMTAB == shdr->sh_type)
         {
             m_symNameSection = m_dataBuff + shdr->sh_offset;
@@ -55,32 +69,12 @@ bool ELFMap::Parser(const char *fileNameAndPath)
                 vsym.push_back(sym);
             }
         }*/
-        for(int i=0; i< m_ehdr->e_phnum; i++)
-        {
-            Elf64_Phdr *phdr = (Elf64_Phdr*)(m_dataBuff + m_ehdr->e_phoff) + i;
-            vphdr.push_back(phdr);
-        }
     }
-
-    if(false == ParserELFHead())
+    for(int i=0; i< m_ehdr->e_phnum; i++)
     {
-        return false;
-    };
-
-    if(false == ParserSectionHead())
-    {
-        return false;
-    };
-
-    if(false == ParserProgramHead())
-    {
-        return false;
-    };
-
-    if(false == ParserSymbolTable())
-    {
-        return false;
-    };
+        Elf64_Phdr *phdr = (Elf64_Phdr*)(m_dataBuff + m_ehdr->e_phoff) + i;
+        m_vphdr.push_back(phdr);
+    }
 
     return true;
 }
@@ -147,6 +141,11 @@ bool ELFMap::ParserELFHead()
     return true;
 }
 
+string ELFMap::GetContentELFHead()
+{
+    return "test";
+}
+
 string ELFMap::GetContentSectionHead()
 {
     return "test";
@@ -163,8 +162,8 @@ string ELFMap::GetContent(const char* part)
     string ss(part);
 
     if(ss == "EFL header")
-    {
-        retstr += ehdrstr.magicNumber.pFile;
+    {/*
+        retstr += m_ehdrstr.magicNumber.pFile;
         retstr += ehdrstr.magicNumber.Data;
         retstr += ehdrstr.magicNumber.Value;
         retstr += ehdrstr.magicNumber.Description;
@@ -179,42 +178,42 @@ string ELFMap::GetContent(const char* part)
         retstr += ehdrstr.File_version.pFile;
         retstr += ehdrstr.File_version.Data;
         retstr += ehdrstr.File_version.Value;
-        retstr += ehdrstr.File_version.Description;
+        retstr += ehdrstr.File_version.Description;*/
     }
     else if(ss == "section header")
-    {
+    {/*
         int i = 0;
-        for(auto it : vshdr)
+        for(auto it : m_vshdr)
         {
             char sectionName[64] = {0};
             sprintf(sectionName,"[%02d]%s\n", i, m_shNameSection + it -> sh_name);
             retstr += sectionName;
             retstr += GetHexBase(m_ehdr->e_shoff+i*sizeof(Elf64_Shdr),sizeof(Elf64_Shdr));
             i++;
-        }
+        }*/
     }
     else if(ss == "program header")
     {
         int i = 0;
-        for(auto ep : vphdr)
-        {
+        for(auto ep : m_vphdr)
+        {/*
             char sectionname[64] = {0};
             sprintf(sectionname,"[%02d]\n", i);
             retstr += sectionname;
             retstr += GetHexBase(ehdr->e_phoff+i*sizeof(Elf64_Phdr),sizeof(Elf64_Phdr));
-            i++;
+            i++;*/
         }
     }
     else
     {
         int i = 0;
-        for(auto es : vshdr)
+        for(auto es : m_vshdr)
         {
             char sectionname[64] = {0};
-            sprintf(sectionname,"[%02d]%s", i, shname+es->sh_name);
+            sprintf(sectionname,"[%02d]%s", i, m_shNameSection+es->sh_name);
             if(ss == sectionname)
             {
-                retstr += get_hex_base(es->sh_offset,es->sh_size);
+                retstr += GetHexBase(m_dataBuff+es->sh_offset,es->sh_size);
             }
             i++;
         }
@@ -238,19 +237,19 @@ string ELFMap::GetHex(const char* part)
     else if(ss == "section header")
     {
         int i = 0;
-        for(auto it : vshdr)
+        for(auto it : m_vshdr)
         {
             char sectionName[64] = {0};
             sprintf(sectionName,"[%02d]%s\n", i, m_shNameSection + it ->sh_name);
             retStr += sectionName;
-            retStr += GetHexBase((char*)es,sizeof(Elf64_Shdr));
+            retStr += GetHexBase((char*)it,sizeof(Elf64_Shdr));
             i++;
         }
     }
     else if(ss == "program header")
     {
         int i = 0;
-        for(auto it : vphdr)
+        for(auto it : m_vphdr)
         {
             char sectionName[64] = {0};
             sprintf(sectionName,"[%02d]\n", i);
@@ -258,31 +257,29 @@ string ELFMap::GetHex(const char* part)
             retStr += GetHexBase((char*)it,sizeof(Elf64_Phdr));
             i++;
         }
-    }/*
+    }
     else if(ss.substr(4,ss.length()-4) == ".symtab")
     {
         int i = 0;
-        for(auto it : vsym)
+        for(auto it : m_vsym)
         {
-            char sectionname[64] = {0};
-            //sprintf(sectionname,"[%02d]%s\n", i,m_dataBuff+symnameoff+it->st_name);
-            int n = it->st_name;
-            sprintf(sectionname,"[%02d]%d\n", i,n);
-            retStr += sectionname;
-            retStr += GetHexBase(symoff+i*sizeof(Elf64_Sym),sizeof(Elf64_Sym));
+            char title[64] = {0};
+            sprintf(title,"[%02d]%s\n", i,m_symNameSection+it->st_name);
+            retStr += title;
+            retStr += GetHexBase((char*)(it+i),sizeof(Elf64_Sym));
             i++;
         }
-    }*/
+    }
     else
     {
         int i = 0;
-        for(auto it : vshdr)
+        for(auto it : m_vshdr)
         {
             char sectionName[64] = {0};
-            sprintf(sectionName,"[%02d]%s", i, shname+es->sh_name);
+            sprintf(sectionName,"[%02d]%s", i, m_shNameSection+it->sh_name);
             if(ss == sectionName)
             {
-                retStr += GetHexBase(m_dataBuff+it->sh_offset,es->sh_size);
+                retStr += GetHexBase(m_dataBuff+it->sh_offset,it->sh_size);
             }
             i++;
         }

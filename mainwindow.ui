@@ -22,41 +22,6 @@
         <string>文件结构</string>
        </property>
       </column>
-      <item>
-       <property name="text">
-        <string>demo</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>ELF文件头</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>程序段表</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>[1]节名</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>[2]节名</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>[n]节名</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>节表</string>
-        </property>
-       </item>
-      </item>
      </widget>
     </item>
     <item>

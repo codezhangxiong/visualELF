@@ -23,7 +23,7 @@ public:
     string GetContentProgramHead();
     //获取部分名对应的二进制字符串
     string GetHex(const char *part);
-    string GetHexBase(int off, int len);
+    string GetHexBase(char* beginP, int len);
 
     //文件名、缓存地址和缓存大小
     string m_fileName;
