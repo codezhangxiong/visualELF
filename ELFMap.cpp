@@ -266,7 +266,7 @@ string ELFMap::GetHex(const char* part)
             char title[64] = {0};
             sprintf(title,"[%02d]%s\n", i,m_symNameSection+it->st_name);
             retStr += title;
-            retStr += GetHexBase((char*)(it+i),sizeof(Elf64_Sym));
+            retStr += GetHexBase((char*)it,sizeof(Elf64_Sym));
             i++;
         }
     }
