@@ -34,9 +34,12 @@ public:
     vector<Elf64_Shdr *> m_vshdr;
     vector<Elf64_Phdr *> m_vphdr;
     vector<Elf64_Sym *> m_vsym;
+    vector<Elf64_Dyn *> m_vdyn;
+    vector<Elf64_Sym *> m_vdynsym;
     //节表名节地址、符号表名节地址
     char *m_shNameSection;
     char *m_symNameSection;
+    char *m_dynsymNameSection;
 };
 
 //单行显示内容

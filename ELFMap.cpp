@@ -47,7 +47,6 @@ bool ELFMap::Parser(const char *fileNameAndPath)
         {
             m_symNameSection = m_dataBuff+ shdr->sh_offset;
         }
-        //
         else if(string(".symtab") == string(m_shNameSection + shdr->sh_name))
         {
             char* sectionBegin = m_dataBuff+shdr->sh_offset;
@@ -58,17 +57,31 @@ bool ELFMap::Parser(const char *fileNameAndPath)
                 m_vsym.push_back(sym);
             }
         }
-        /*
-        if(SHT_SYMTAB == shdr->sh_type)
+        else if (string(".dynamic") == string(m_shNameSection + shdr->sh_name))
         {
-            m_symNameSection = m_dataBuff + shdr->sh_offset;
-            int n = (shdr->sh_size)/sizeof(Elf64_Sym);
-            for(int i = 0;i<n;i++)
+            char* sectionBegin = m_dataBuff+shdr->sh_offset;
+            int dynCount = shdr ->sh_size/sizeof(Elf64_Dyn);
+            for(int i = 0;i<dynCount;i++)
             {
-                Elf64_Sym *sym = (Elf64_Sym *)(shdr->sh_offset)+i;
-                vsym.push_back(sym);
+                Elf64_Dyn* dyn = (Elf64_Dyn*)sectionBegin+i;
+                if(0 == dyn->d_tag) break;
+                m_vdyn.push_back(dyn);
             }
-        }*/
+        }
+        else if(string(".dynstr") == string(m_shNameSection + shdr->sh_name))
+        {
+            m_dynsymNameSection = m_dataBuff+ shdr->sh_offset;
+        }
+        else if(string(".dynsym") == string(m_shNameSection + shdr->sh_name))
+        {
+            char* sectionBegin = m_dataBuff+shdr->sh_offset;
+            int dynsymCount = shdr ->sh_size/sizeof(Elf64_Sym);
+            for(int i =0;i<dynsymCount;i++)
+            {
+                Elf64_Sym* dynsym = (Elf64_Sym*)sectionBegin+i;
+                m_vdynsym.push_back(dynsym);
+            }
+        }
     }
     for(int i=0; i< m_ehdr->e_phnum; i++)
     {
@@ -265,6 +278,30 @@ string ELFMap::GetHex(const char* part)
         {
             char title[64] = {0};
             sprintf(title,"[%02d]%s\n", i,m_symNameSection+it->st_name);
+            retStr += title;
+            retStr += GetHexBase((char*)it,sizeof(Elf64_Sym));
+            i++;
+        }
+    }
+    else if(ss.substr(4,ss.length()-4) == ".dynamic")
+    {
+        int i = 0;
+        for(auto it : m_vdyn)
+        {
+            char title[64] = {0};
+            sprintf(title,"[%02d]\n", i);
+            retStr += title;
+            retStr += GetHexBase((char*)it,sizeof(Elf64_Dyn));
+            i++;
+        }
+    }
+    else if(ss.substr(4,ss.length()-4) == ".dynsym")
+    {
+        int i = 0;
+        for(auto it : m_vdynsym)
+        {
+            char title[64] = {0};
+            sprintf(title,"[%02d]%s\n", i,m_dynsymNameSection+it->st_name);
             retStr += title;
             retStr += GetHexBase((char*)it,sizeof(Elf64_Sym));
             i++;
